@@ -17,9 +17,9 @@ A high-throughput, low-latency transaction processing and fraud mitigation engin
 # Technology Stack
 **Technology	Purpose**
 
-**Java 21	** Utilizing modern language features like records, pattern matching, and lightweight Virtual Threads.
+**Java 21** Utilizing modern language features like records, pattern matching, and lightweight Virtual Threads.
 
-**Spring Boot 3.x	** Enterprise framework for configuration, dependency injection, and RESTful API presentation.
+**Spring Boot 3.x** Enterprise framework for configuration, dependency injection, and RESTful API presentation.
 
 **Spring Data Redis**	High-performance, in-memory key-value abstraction layer utilized for the sliding window algorithm.
 
