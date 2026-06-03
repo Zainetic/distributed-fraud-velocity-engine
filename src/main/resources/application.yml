@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: zbank-fraud-engine
+  
+  # Enable Java 21 Virtual Threads for massive concurrency
+  threads:
+    virtual:
+      enabled: true
+
+  # Redis Configuration for the Velocity Engine
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      # Timeout for connecting to the Redis cluster
+      timeout: 2000ms
