@@ -1,5 +1,4 @@
 # Distributed Real-Time Fraud Detection and Velocity Engine
-Understood. Here is the revised, strictly professional GitHub README.
 
 **ZBank Distributed Real-Time Fraud Detection & Velocity Engine**
 A high-throughput, low-latency transaction processing and fraud mitigation engine designed to evaluate payment requests in real time. Built with Java 21 and Spring Boot 3.x, this system leverages Virtual Threads (Project Loom) for massive concurrency and Redis Pipelining to execute sliding-window velocity checks within single-digit milliseconds, protecting financial infrastructure against rapid-fire card exploitation and velocity attacks.
