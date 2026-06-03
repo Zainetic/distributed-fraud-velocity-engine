@@ -16,11 +16,17 @@ A high-throughput, low-latency transaction processing and fraud mitigation engin
 
 # Technology Stack
 **Technology	Purpose**
+
 **Java 21	** Utilizing modern language features like records, pattern matching, and lightweight Virtual Threads.
+
 **Spring Boot 3.x	** Enterprise framework for configuration, dependency injection, and RESTful API presentation.
+
 **Spring Data Redis**	High-performance, in-memory key-value abstraction layer utilized for the sliding window algorithm.
+
 **Spring Data JPA**	Object-relational mapping for maintaining static transaction rules and audit tables.
+
 **PostgreSQL**	Relational data persistence tier optimized for complex, relational ledger indexing and rule lookup.
+
 **JUnit 5**	Test execution framework driving the system's strict integration and automated regression verification.
 
 # Configuration & Deployment
