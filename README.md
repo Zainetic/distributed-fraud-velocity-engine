@@ -24,39 +24,6 @@ A high-throughput, low-latency transaction processing and fraud mitigation engin
 **PostgreSQL**	Relational data persistence tier optimized for complex, relational ledger indexing and rule lookup.
 **JUnit 5**	Test execution framework driving the system's strict integration and automated regression verification.
 
-# Core Directory Structure
-The system implements a structured, clean-architecture framework organized by business domains and infrastructural responsibilities:
-
-fraud-velocity-engine/
-├── pom.xml
-└── src/
-    ├── main/
-    │   ├── java/
-    │   │   └── com/
-    │   │       └── zbank/
-    │   │           └── fraud/
-    │   │               ├── FraudVelocityEngineApplication.java  # Application Entry Point
-    │   │               ├── config/
-    │   │               │   └── RedisConfig.java                 # Redis Template Engine Configurations
-    │   │               ├── controller/
-    │   │               │   └── FraudCheckController.java        # REST API Processing Layer
-    │   │               ├── model/
-    │   │               │   └── TransactionRequest.java          # Immutable Transaction Domain Records
-    │   │               ├── service/
-    │   │               │   └── VelocityFraudDetector.java       # Core Sliding Window Logic
-    │   │               ├── entity/
-    │   │               │   └── StaticFraudRule.java             # Database Persistence Models
-    │   │               └── repository/
-    │   │                   └── FraudRuleRepository.java         # Relational Storage Query Abstractions
-    │   └── resources/
-    │       └── application.yml                                  # Virtual Thread and Connection Pools Configuration
-    └── test/
-        └── java/
-            └── com/
-                └── zbank/
-                    └── fraud/
-                        └── service/
-                            └── VelocityFraudDetectorTest.java   # Core Engine Integration Validation Suite
 # Configuration & Deployment
 
 **Virtual Threads Activation**
