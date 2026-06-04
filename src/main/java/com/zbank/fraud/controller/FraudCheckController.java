@@ -4,6 +4,7 @@ import com.zbank.fraud.model.TransactionRequest;
 import com.zbank.fraud.service.VelocityFraudDetector;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 import java.time.Instant;
 
@@ -18,7 +19,7 @@ public class FraudCheckController {
     }
 
     @PostMapping("/velocity-check")
-    public ResponseEntity<FraudCheckResponse> checkVelocity(@RequestBody TransactionRequest request) {
+    public ResponseEntity<FraudCheckResponse> checkVelocity(@Valid @RequestBody TransactionRequest request) {
         
         // Safety net: If the upstream payment gateway doesn't provide a timestamp, generate one.
         TransactionRequest processedRequest = request.timestamp() != null ? request :
