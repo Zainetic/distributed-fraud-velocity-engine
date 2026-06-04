@@ -28,5 +28,8 @@ public record TransactionRequest(
     @NotBlank(message = "Currency code is required")
     String currency,
     
+    @NotBlank(message = "Merchant Category Code is required")
+    String merchantCategoryCode,
+    
     Instant timestamp
 ) {}
