@@ -44,7 +44,7 @@ class VelocityFraudDetectorTest {
                     "acc_123",
                     new BigDecimal("25.00"),
                     "EUR",
-                    now.plusSeconds(i) // Space them out by 1 second
+                    TEST_CARD_ID, now.plusSeconds(i) 
             );
             
             boolean isFraud = velocityFraudDetector.isFraudulentVelocity(validReq);
@@ -58,7 +58,7 @@ class VelocityFraudDetectorTest {
                 "acc_123",
                 new BigDecimal("500.00"),
                 "EUR",
-                now.plusSeconds(4)
+                TEST_CARD_ID, now.plusSeconds(4)
         );
 
         boolean isFraudulent = velocityFraudDetector.isFraudulentVelocity(fraudulentReq);

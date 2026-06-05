@@ -25,3 +25,15 @@ spring:
     show-sql: true      # Prints SQL queries to the console for debugging
     properties:
       hibernate:
+  
+  kafka:
+      bootstrap-servers: localhost:9092
+      producer:
+        # Automatically convert our Java Records into JSON before sending to Kafka
+        value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      consumer:
+        # Automatically convert incoming JSON back into Java Records
+        value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+        group-id: zbank-fraud-group
+        properties:
+          spring.json.trusted.packages: "*"    
