@@ -17,7 +17,7 @@ services:
       POSTGRES_PASSWORD: password 
       POSTGRES_DB: zbank_fraud
     ports:
-      - "5432:5432"
+      - "5433:5432"
     networks:
       - zbank-network
     volumes:
@@ -43,6 +43,18 @@ services:
       networks:
         - zbank-network
 
+  pgadmin:
+      image: dpage/pgadmin4
+      container_name: zbank-pgadmin
+      environment:
+        PGADMIN_DEFAULT_EMAIL: admin@zbank.com
+        PGADMIN_DEFAULT_PASSWORD: admin
+      ports:
+        - "5050:80"
+      networks:
+        - zbank-network
+      depends_on:
+        - postgres-db
 
 networks:
   zbank-network:

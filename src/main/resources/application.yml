@@ -14,7 +14,7 @@ spring:
 
   # PostgreSQL Configuration
   datasource:
-    url: jdbc:postgresql://localhost:5432/zbank_fraud
+    url: jdbc:postgresql://localhost:5433/zbank_fraud
     username: postgres
     password: admin
     driver-class-name: org.postgresql.Driver
