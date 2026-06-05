@@ -1,57 +1,114 @@
-# Distributed Real-Time Fraud Detection and Velocity Engine
+ZBank Distributed Real-Time Fraud Detection & Velocity Engine
 
-**ZBank Distributed Real-Time Fraud Detection & Velocity Engine**
-A high-throughput, low-latency transaction processing and fraud mitigation engine designed to evaluate payment requests in real time. Built with Java 21 and Spring Boot 3.x, this system leverages Virtual Threads (Project Loom) for massive concurrency and Redis Pipelining to execute sliding-window velocity checks within single-digit milliseconds, protecting financial infrastructure against rapid-fire card exploitation and velocity attacks.
+A high-throughput, low-latency transaction processing and fraud mitigation engine designed to evaluate payment requests in real time. Built with Java 21 and Spring Boot 3.x, this system leverages Virtual Threads (Project Loom) for massive concurrency, Redis Pipelining for sub-millisecond sliding-window calculations, and Apache Kafka for asynchronous event-driven auditing.
 
-**Key Features**
-**Sliding-Window Velocity Engine:** Utilizes Redis Sorted Sets (ZSET) to evaluate card activity within a rolling 60-second window, instantaneously blocking anomalous transaction bursts.
+This architecture mirrors enterprise FinTech payment gateways, protecting financial infrastructure against rapid-fire card exploitation and velocity attacks without blocking the main payment execution threads.
 
-**Virtual Thread Concurrency Model:** Out-of-the-box configuration for Java 21 Virtual Threads, removing the standard OS thread-per-request limitation and allowing the engine to handle thousands of concurrent API evaluations without thread pool exhaustion.
+Architectural Overview
+The engine implements a decoupled, multi-tier validation process for every incoming transaction:
 
-**Optimized Network I/O via Pipelining:** Batches multiple Redis operations (ZADD, ZREMRANGEBYSCORE, ZCARD, EXPIRE) into a single network round-trip, minimizing network latency at critical decision points.
+Synchronous Static Rules (PostgreSQL): Evaluates the payload against hardcoded relational constraints (e.g., Blacklisted Merchant Category Codes).
 
-**Self-Cleaning Architecture:** Automatic Time-To-Live (TTL) enforcement on transactional keys inside Redis to avoid data leaks and safely manage in-memory RAM usage.
+Synchronous Velocity Engine (Redis): Executes a rolling 60-second sliding-window algorithm to evaluate card activity frequency.
 
-**Domain Immutability:** Enforces strict data integrity using Java 21 record representations for incoming transaction payloads, eliminating side-effects across concurrent processing routines.
+Asynchronous Alerting (Apache Kafka): If a transaction triggers a fraud rule, the API immediately returns a decline to the client while simultaneously publishing a FraudAlertEvent to a Kafka topic.
 
-# Technology Stack
-**Technology	Purpose**
+Decoupled Auditing (Kafka Consumer -> PostgreSQL): A background listener consumes the alert events and persists them to an audit ledger (fraud_audit_logs), ensuring database I/O latency never impacts the client-facing payment response time.
 
-**Java 21** Utilizing modern language features like records, pattern matching, and lightweight Virtual Threads.
+Key Technical Features
+Virtual Thread Concurrency: Out-of-the-box configuration for Java 21 Virtual Threads, removing standard OS thread-per-request limitations. The engine gracefully handles thousands of concurrent REST API evaluations without thread pool exhaustion.
 
-**Spring Boot 3.x** Enterprise framework for configuration, dependency injection, and RESTful API presentation.
+Optimized Network I/O via Pipelining: Batches multiple Redis operations (ZADD, ZREMRANGEBYSCORE, ZCARD, EXPIRE) into a single network round-trip.
 
-**Spring Data Redis**	High-performance, in-memory key-value abstraction layer utilized for the sliding window algorithm.
+Event-Driven Microservice Design: Integrates Apache Kafka (running in KRaft mode) to completely decouple fraud detection logic from downstream compliance and notification systems.
 
-**Spring Data JPA**	Object-relational mapping for maintaining static transaction rules and audit tables.
+Domain Immutability & Boundary Validation: Enforces strict data integrity using Java 21 record representations and Jakarta Validation for incoming payloads. Global exception handlers (@ControllerAdvice) ensure precise, standardized API contracts.
 
-**PostgreSQL**	Relational data persistence tier optimized for complex, relational ledger indexing and rule lookup.
+Self-Cleaning Data Structures: Automatic Time-To-Live (TTL) enforcement on transactional keys inside Redis to prevent memory leaks and safely manage RAM usage.
 
-**JUnit 5**	Test execution framework driving the system's strict integration and automated regression verification.
+Technology Stack
+Language: Java 21
 
-# Configuration & Deployment
+Framework: Spring Boot 3.x (Web, Validation, Data JPA, Data Redis, Kafka)
 
-**Virtual Threads Activation**
-The engine optimizes the thread execution model implicitly by running incoming web requests on lightweight fibers rather than platform threads:
+In-Memory Datastore: Redis 7.2 (Alpine)
 
-YAML File:
-spring:
-  threads:
-    virtual:
-      enabled: true
-      
-# Local Development Setup
+Relational Database: PostgreSQL 16 (Alpine)
 
-1- Clone the repository and navigate to the project directory.
+Event Streaming: Apache Kafka 3.7.0 (Official Apache Image / KRaft Mode)
 
-2- Initialize a local Redis cache instance running on port 6379:
+Infrastructure Management: Docker & Docker Compose
 
-docker run -p 6379:6379 -d redis
+Database Administration: pgAdmin 4
 
-3- Compile the build artifacts using Maven:
+Local Development & Deployment
+The entire infrastructure is containerized and managed via Docker Compose.
 
-mvn clean install
+1. Initialize the Infrastructure
+Ensure Docker is running, then execute the following command in the project root to spin up PostgreSQL, Redis, Apache Kafka, and pgAdmin:
 
-4- Execute the system validation suite to confirm environment functionality:
+docker-compose up -d
 
-mvn test
+Note: The PostgreSQL container is mapped to host port 5433 to prevent collisions with local database installations.
+
+2. Boot the Spring Application
+
+Run the FraudVelocityEngineApplication.java entry point. Spring Boot will automatically connect to the Docker network and use Hibernate to initialize the blacklisted_merchants and fraud_audit_logs tables.
+
+3. Database Management (pgAdmin)
+
+A visual database dashboard is included in the Docker stack.
+
+URL: http://localhost:5050
+
+Credentials: admin@zbank.com / admin
+
+Connection Host: postgres-db (Port: 5432, DB: zbank_fraud, User: postgres, Pass: admin)
+
+API Documentation
+
+Evaluate Transaction Velocity
+Evaluates a single transaction against the static rules and the 60-second Redis sliding window.
+
+Endpoint: POST /api/v1/fraud/velocity-check
+
+Content-Type: application/json
+
+Request Payload:
+
+JSON
+{
+    "transactionId": "tx_uuid_string",
+    "cardId": "card_554433",
+    "accountId": "acc_112233",
+    "amount": 150.00,
+    "currency": "EUR",
+    "merchantCategoryCode": "5411"
+}
+Success Response (200 OK):
+
+JSON
+{
+    "transactionId": "tx_uuid_string",
+    "isFraudulent": false,
+    "statusReason": "APPROVED"
+}
+Decline Response (200 OK - Triggers Async Kafka Event):
+
+JSON
+{
+    "transactionId": "tx_uuid_string",
+    "isFraudulent": true,
+    "statusReason": "DECLINED_VELOCITY_LIMIT_EXCEEDED"
+}
+Validation Error Response (400 Bad Request):
+
+JSON
+{
+    "status": 400,
+    "message": "Validation Failed",
+    "details": {
+        "amount": "Transaction amount must be strictly positive"
+    },
+    "timestamp": "2026-06-05T12:00:00.000Z"
+}
